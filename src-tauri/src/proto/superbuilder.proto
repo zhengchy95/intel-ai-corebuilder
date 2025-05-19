@@ -1,0 +1,365 @@
+syntax = "proto3";
+
+option csharp_namespace = "SuperBuilderWinService";
+option go_package = "superbuilder/SuperBuilderWinService";
+
+package SuperBuilder;
+
+// The greeting service definition.
+service SuperBuilder {
+  // Send a greeting ( For connection testing )
+  rpc SayHello (SayHelloRequest) returns (SayHelloResponse);
+
+  // Send a greeting ( For connection testing )
+  rpc SayHelloPyllm (SayHelloRequest) returns (SayHelloResponse);
+
+  // Send a chat message and stream returns a response
+  rpc Chat (ChatRequest) returns (stream ChatResponse);
+
+  // Sends signal to safely stop the current chat request
+  rpc StopChat (StopChatRequest) returns (StopChatResponse);
+
+  // Loads the models and any other backend components before chatting
+  rpc LoadModels (LoadModelsRequest) returns (LoadModelsResponse);
+
+  // Check on health status backend system / service (for example: RAG check)
+  rpc CheckHealth (CheckHealthRequest) returns (CheckHealthResponse);
+
+  // Give LLM feedback on a question's response to improve future responses
+  rpc AddFeedback (AddFeedbackRequest) returns (AddFeedbackResponse);
+
+  // Upload a list of files to the RAG module to be vector stored, stream the upload progress
+  rpc AddFiles (AddFilesRequest) returns (stream AddFilesResponse);
+
+  // Sends signal to stop the current upload file request
+  rpc StopAddFiles (StopAddFilesRequest) returns (StopAddFilesResponse);
+
+  // Remove a list of files from RAG doc store
+  rpc RemoveFiles (RemoveFilesRequest) returns (RemoveFilesResponse);
+
+  // Request to download a certain list of models, or just all required models if not specified
+  rpc DownloadFiles (DownloadFilesRequest) returns (stream DownloadFilesResponse);
+
+  // Request list of all files uploaded to the loaded document store
+  rpc GetFileList (GetFileListRequest) returns (GetFileListResponse);
+
+  // Set and load models in the backend given a model path
+  rpc SetModels (SetModelsRequest) returns (SetModelsResponse);
+
+  // Unloads models that are in the backend
+  rpc UnloadModels (UnloadModelsRequest) returns (UnloadModelsResponse);
+
+  // Change the RAG, LLM, and backend parameters
+  rpc SetParameters (SetParametersRequest) returns (SetParametersResponse);
+
+  // Inform the server that the client has disconnected
+  rpc ClientDisconnected (ClientDisconnectedRequest) returns (ClientDisconnectedResponse);
+
+  // Get config info from middleware
+  rpc GetClientConfig (GetClientConfigRequest) returns (GetClientConfigResponse);
+
+  // Get chat history messages from middleware
+  rpc GetChatHistory (GetChatHistoryRequest) returns (GetChatHistoryResponse);
+
+  // Send a greeting ( For connection testing )
+  rpc GetSoftwareUpdate (SayHelloRequest) returns (SayHelloResponse);
+
+  // Setting Vector DB of default assistant in sqlite db.
+  rpc SetVectorDB (SetVectorDBRequest) returns (SetVectorDBResponse);
+
+  // Removes a session and all data related to session from database given session id
+  rpc RemoveSession (RemoveSessionRequest) returns (RemoveSessionResponse);
+
+  // Update a session name given a valid unique session id
+  rpc SetSessionName (SetSessionNameRequest) returns (SetSessionNameResponse);
+
+  // Set Active Assistant or Models
+  rpc SetActiveAssistant(SetActiveAssistantRequest) returns (SetActiveAssistantResponse);
+
+  //Using an AssistantViewModel it will set the sqlite database active assistant to those fields.
+  rpc  SetAssistantViewModel(SetAssistantViewModelRequest) returns (SetAssistantViewModelResponse);
+
+  //Using UserConfigViewModel, sets sqlite database userconfig jsonappsettings to the corresponding fields.
+  rpc  SetUserConfigViewModel(SetUserConfigViewModelRequest) returns (SetUserConfigViewModelResponse);
+
+  rpc ConvertModel(ConvertModelRequest) returns (ConvertModelResponse);
+
+  rpc UploadModel(UploadModelRequest) returns (UploadModelResponse);
+
+  rpc ExportUserConfig(ExportUserConfigRequest) returns (ExportUserConfigResponse);
+  rpc ImportUserConfig(ImportUserConfigRequest) returns (ImportUserConfigResponse);
+}
+
+// The request message containing the user's name.
+message SayHelloRequest {
+  string name = 1;
+}
+
+// The response message containing the greetings.
+message SayHelloResponse {
+  string message = 1;
+}
+
+// The request message for the chat.
+message ConversationHistory {
+  string role = 1;
+  string content = 2;
+}
+
+// The request message for the chat.
+message ChatRequest {
+  string name = 1;
+  string prompt = 2;
+  repeated ConversationHistory history = 3;
+  int32 sessionId = 4; // chat session that this chat belongs to
+  optional string queryType = 5; // The type of query to do on the attached files
+  optional string attachedFiles = 6; // The files to use specifically for this chat request
+}
+
+// The response message for the chat.
+message ChatResponse {
+  string message = 1;
+}
+
+message StopChatRequest {
+}
+
+message StopChatResponse {
+}
+
+message LoadModelsRequest {
+}
+
+message LoadModelsResponse {
+	bool status = 1; // returns true if successful load
+}
+
+// The request message containing a placeholder in case we need to send data
+message CheckHealthRequest {
+	string typeOfCheck = 1;
+}
+
+// The response message containing the status of the system
+message CheckHealthResponse {
+  string status = 1;
+}
+
+// The request message containing a question, its feedback, and type of feedback
+message AddFeedbackRequest {
+	string question = 1;
+	string feedback = 2;
+	string feedbackType = 3;
+	optional string answer = 4;
+}
+
+// The response message containing the feedback + question + feedback type
+message AddFeedbackResponse {
+  string message = 1;
+}
+
+// The request message containing a list of files to be uploaded to RAG
+message AddFilesRequest {
+	string filesToUpload = 1;
+}
+
+// The response message streamed back as a file is uploaded
+message AddFilesResponse {
+  string filesUploaded = 1; // list of files able to be uploaded to vector db
+  optional string currentFileUploading = 2; // current file being uploaded if any
+  optional string currentFileProgress = 3; // upload progress percentage from 0 to 100
+}
+
+// The request message which currently contains nothing (but might be needed in the future)
+message GetFileListRequest {
+  string fileType = 1;
+}
+
+message StopAddFilesRequest {
+}
+
+message StopAddFilesResponse {
+}
+
+// The request message when a client disconnects
+message ClientDisconnectedRequest {
+}
+
+// The response message containing list of all files found in document store
+message GetFileListResponse {
+  string fileList = 1;
+}
+
+// The request message containing a list of files to be removed from RAG
+message RemoveFilesRequest {
+	string filesToRemove = 1;
+}
+
+// The response message containing list of all files successfully removed from RAG
+message RemoveFilesResponse {
+  string filesRemoved = 1;
+}
+
+// The request message containing list of models to download (if none, download missing)
+message DownloadFilesRequest {
+	string FileUrl = 1;
+	string localPath = 2;
+	optional string tokenId =3;
+}
+
+// The response message containing a list of models actually downloaded
+message DownloadFilesResponse {
+  int32 progress = 1; 
+  string FileDownloaded = 2;
+}
+
+// The request message which tells the backend which models to set
+message SetModelsRequest {
+	optional string llm = 1;
+	optional string embedder = 2;
+	optional string ranker = 3;
+}
+
+// The response message of the models that were set
+message SetModelsResponse {
+	string modelsLoaded = 1;
+}
+
+// The request message which tells the backend which models to unload (true means unload)
+message UnloadModelsRequest {
+	bool llm = 1;
+	bool embedder = 2;
+	bool ranker = 3;
+}
+
+// The response message of the models that were unloaded
+message UnloadModelsResponse {
+	string modelsUnloaded = 1;
+}
+
+// A bunch of optional parameters to set, leaving blank is the same as not changing
+message SetParametersRequest {
+  string parameters_json = 1; //JSON string of any parameters present in the ModelParametersViewModel classes
+
+}
+
+// Response of setting the parameters, nothing for now
+message SetParametersResponse {}
+
+// The response message when a client disconnects
+message ClientDisconnectedResponse {
+}
+
+// The request message containing the user's name.
+message GetClientConfigRequest {
+  string assistant = 1;
+}
+
+// The response message containing the greetings.
+message GetClientConfigResponse {
+  string data = 1;
+}
+
+// The request message (currently empty)
+message GetChatHistoryRequest {
+}
+
+// The response message which returns all chat messages
+message GetChatHistoryResponse {
+  string data = 1;
+}
+
+message SetVectorDBRequest {
+	string connectionString = 1;
+}
+
+message SetVectorDBResponse {
+	string message = 1;
+}
+
+message RemoveSessionRequest {
+	int32 sessionId = 1;
+}
+
+message RemoveSessionResponse {
+	bool success = 1;
+}
+
+message SetSessionNameRequest {
+	int32 sessionId = 1;
+	string sessionName = 2;
+}
+
+message SetSessionNameResponse {
+	bool success = 1;
+}
+
+message SetActiveAssistantRequest {
+    string assistant = 1;
+    string models_json = 2;
+}
+
+message SetActiveAssistantResponse {
+    bool success = 1;
+    string message = 2;
+}
+
+message SetAssistantViewModelRequest {
+	string view_model = 1;
+	bool resetUXSettings=2;
+}
+
+message SetAssistantViewModelResponse {
+	string message = 1;
+}
+
+message SetUserConfigViewModelRequest {
+	string view_model = 1;
+}
+
+message SetUserConfigViewModelResponse {
+	string message = 1;
+}
+
+message ConvertModelRequest {
+	string model_path = 1;
+	optional string parameters = 2;
+}
+
+message ConvertModelResponse {
+	string message = 1;
+}
+
+message UploadModelRequest {
+	string source_dir = 1;
+	string model = 2;
+	string model_type = 3;
+	string download_link = 4;
+	bool move_directory = 5;
+}
+
+message UploadModelResponse {
+	string message = 1;
+}
+
+// Request message for exporting user configuration
+message ExportUserConfigRequest {
+    string AssistantName = 1;
+    string ExportPath = 2;
+}
+
+// Response message for exporting user configuration
+message ExportUserConfigResponse {
+    bool Success = 1;
+    string Message = 2;
+}
+
+// Request message for importing user configuration
+message ImportUserConfigRequest {
+    string ImportPath = 1;
+}
+
+// Response message for importing user configuration
+message ImportUserConfigResponse {
+    bool Success = 1;
+    string Message = 2;
+}
