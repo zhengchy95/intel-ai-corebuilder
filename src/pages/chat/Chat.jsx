@@ -4,7 +4,12 @@ import SendIcon from "@mui/icons-material/Send";
 import AttachFileIcon from "@mui/icons-material/AttachFile";
 import LanguageIcon from "@mui/icons-material/Language";
 
+import useChatStore from "../../stores/ChatStore";
+
 export default function Chat() {
+  const selectedSession = useChatStore((state) => state.selectedSession);
+  const sessions = useChatStore((state) => state.sessions);
+
   return (
     <Box
       sx={{
@@ -21,12 +26,60 @@ export default function Chat() {
           width: "75%",
           p: 2,
           justifyItems: "center",
-          WebkitAlignContent: "center",
+          WebkitAlignContent:
+            selectedSession !== null ? "flex-start" : "center",
         }}
       >
-        <Typography variant="h5" sx={{ mb: 2 }}>
-          What's on your mind today?
-        </Typography>
+        {selectedSession !== null ? (
+          <>
+            {sessions
+              .find((session) => session.sid === selectedSession)
+              .messages.map((message, index) =>
+                message.sender === "assistant" ? (
+                  <Box
+                    key={index}
+                    sx={{
+                      display: "flex",
+                      alignItems: "flex-start",
+                      width: "100%",
+                      justifyContent: "flex-end",
+                      mb: 2,
+                      borderRadius: 2,
+                      p: 1,
+                    }}
+                  >
+                    <LanguageIcon sx={{ mr: 1 }} />
+                    <Typography variant="subtitle2">{message.text}</Typography>
+                  </Box>
+                ) : (
+                  <Box
+                    key={index}
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      width: "100%",
+                      justifyContent: "right",
+                      mb: 2,
+
+                      borderRadius: 2,
+                      p: 1,
+                    }}
+                  >
+                    <Typography
+                      variant="subtitle2"
+                      sx={{ p: 1, bgcolor: "lightGrey", borderRadius: 2 }}
+                    >
+                      {message.text}
+                    </Typography>
+                  </Box>
+                )
+              )}
+          </>
+        ) : (
+          <Typography variant="h5" sx={{ mb: 2 }}>
+            What's on your mind today?
+          </Typography>
+        )}
       </Box>
 
       <Box

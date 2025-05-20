@@ -14,12 +14,17 @@ import {
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 
+import useAppStore from "../../stores/AppStore";
 import useUIStore from "../../stores/UIStores";
+import useModelStore from "../../stores/ModelStore";
 
 export default function Appbar() {
   const theme = useTheme();
+  const username = useAppStore((state) => state.username);
   const drawerOpen = useUIStore((state) => state.drawerOpen);
   const setDrawerOpen = useUIStore((state) => state.setDrawerOpen);
+  const appPage = useUIStore((state) => state.appPage);
+  const models = useModelStore((state) => state.models);
 
   return (
     <MuiAppBar
@@ -60,51 +65,70 @@ export default function Appbar() {
           >
             <MenuIcon />
           </IconButton>
-          <Box sx={{ display: "flex", minWidth: 120, alignContent: "center" }}>
-            <FormControl fullWidth>
-              <Select
-                labelId="model-select-label"
-                id="model-select"
-                value={10}
-                size="small"
-                variant="standard"
-                sx={{
-                  "&:before, &:after": {
-                    borderBottom: "none !important",
-                  },
-                  "& .MuiSelect-root:before, & .MuiSelect-root:after": {
-                    borderBottom: "none !important",
-                  },
-                  "& .MuiInput-underline:before, & .MuiInput-underline:after": {
-                    borderBottom: "none !important",
-                  },
-                  "& .MuiSelect-select": {
-                    fontSize: "14px", // smaller font size
-                    display: "flex",
-                    alignItems: "center", // vertical centering
-                    minHeight: "32px", // ensure enough height for centering
-                    paddingY: "4px",
-                  },
-                }}
-              >
-                <MenuItem value={0} sx={{ fontSize: "14px" }}>
-                  None
-                </MenuItem>
-                <MenuItem value={10} sx={{ fontSize: "14px" }}>
-                  Qwen2.5-1.5B-Instruct-int8-ov
-                </MenuItem>
-                <MenuItem value={20} sx={{ fontSize: "14px" }}>
-                  Model 2
-                </MenuItem>
-                <MenuItem value={30} sx={{ fontSize: "14px" }}>
-                  Model 3
-                </MenuItem>
-              </Select>
-            </FormControl>
-          </Box>
+          {appPage === "chat" && (
+            <Box
+              sx={{ display: "flex", minWidth: 120, alignContent: "center" }}
+            >
+              <FormControl fullWidth>
+                <Select
+                  labelId="model-select-label"
+                  id="model-select"
+                  value={
+                    models.find(
+                      (m) =>
+                        m.selected &&
+                        m.downloaded &&
+                        m.model_type === "chat_model"
+                    )?.id || -1
+                  }
+                  size="small"
+                  variant="standard"
+                  sx={{
+                    "&:before, &:after": {
+                      borderBottom: "none !important",
+                    },
+                    "& .MuiSelect-root:before, & .MuiSelect-root:after": {
+                      borderBottom: "none !important",
+                    },
+                    "& .MuiInput-underline:before, & .MuiInput-underline:after":
+                      {
+                        borderBottom: "none !important",
+                      },
+                    "& .MuiSelect-select": {
+                      fontSize: "14px", // smaller font size
+                      display: "flex",
+                      alignItems: "center", // vertical centering
+                      minHeight: "32px", // ensure enough height for centering
+                      paddingY: "4px",
+                    },
+                  }}
+                >
+                  <MenuItem value={-1} sx={{ fontSize: "14px" }}>
+                    No Model Available
+                  </MenuItem>
+                  {models
+                    ?.filter(
+                      (model) =>
+                        model.downloaded && model.model_type === "chat_model"
+                    )
+                    .map((model) => (
+                      <MenuItem
+                        key={model.id}
+                        value={model.id}
+                        sx={{ fontSize: "14px" }}
+                      >
+                        {model.full_name}
+                      </MenuItem>
+                    ))}
+                </Select>
+              </FormControl>
+            </Box>
+          )}
         </Box>
         <Box>
-          <Avatar sx={{ width: 28, height: 28, fontSize: "12px" }}>OZ</Avatar>
+          <Avatar sx={{ width: 28, height: 28, fontSize: "12px" }}>
+            {username}
+          </Avatar>
         </Box>
       </Toolbar>
     </MuiAppBar>

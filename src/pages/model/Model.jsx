@@ -1,6 +1,9 @@
 import * as React from "react";
+import { listen } from "@tauri-apps/api/event";
+import { openUrl } from "@tauri-apps/plugin-opener";
 import {
   Box,
+  Chip,
   Typography,
   TextField,
   IconButton,
@@ -12,19 +15,49 @@ import {
   Button,
   Select,
   MenuItem,
+  LinearProgress,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import ClearIcon from "@mui/icons-material/Clear";
 
+import useModelStore from "../../stores/ModelStore";
+
 export default function Model() {
+  const localModelDir = useModelStore((state) => state.localModelDir);
+  const models = useModelStore((state) => state.models);
+  const downloadModel = useModelStore((state) => state.downloadModel);
+  const downloading = useModelStore((state) => state.downloading);
+  const downloadProgress = useModelStore((state) => state.downloadProgress);
+
+  React.useEffect(() => {
+    const unlisten = listen("download-progress", (event) => {
+      const [downloadFile, progressData] = event.payload;
+      useModelStore.getState().setDownloadProgress(progressData);
+      console.debug("Download progress:", downloadFile, progressData);
+    });
+
+    return () => {
+      unlisten.then((fn) => fn());
+    };
+  }, []);
+
+  const handleModelSelect = (model) => {
+    useModelStore.getState().setSelectedModel(model);
+  };
+
   return (
     <Box
       sx={{
         pt: 3,
-        height: "100%",
+        pb: 10,
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
+        overflowY: "auto",
       }}
     >
       <TextField
@@ -87,8 +120,8 @@ export default function Model() {
           },
         }}
         sx={{
-          mb: 2,
-          width: "60%",
+          my: 10,
+          width: "50%",
           "& .MuiOutlinedInput-root": {
             borderRadius: 8,
             backgroundColor: "#fff",
@@ -105,44 +138,158 @@ export default function Model() {
         }}
       />
 
-      <Card sx={{ width: "85%" }}>
-        <CardContent>
-          <Typography
-            variant="body1"
-            gutterBottom
-            sx={{ color: "text.primary" }}
+      {["chat_model", "embedding_model", "ranker_model"].map((modelType) => (
+        <Accordion
+          key={modelType}
+          defaultExpanded={modelType === "chat_model"}
+          sx={{ width: "75%", mb: 2, boxShadow: 0 }}
+        >
+          <AccordionSummary
+            expandIcon={<KeyboardArrowDownIcon />}
+            aria-controls={`${modelType}-content`}
+            id={`${modelType}-header`}
           >
-            Qwen2.5-1.5B-Instruct-int8-ov
-          </Typography>
-          <Stack direction="row" spacing={2}>
-            <Typography variant="caption" color="text.primary">
-              Model ID:
+            <Typography variant="h6">
+              {modelType
+                .replace(/_/g, " ")
+                .replace(/\b\w/g, (c) => c.toUpperCase())
+                .replace(/\s\w/g, (c) => c.toLowerCase())}
             </Typography>
-            <Typography variant="caption" color="text.secondary">
-              OpenVINO/Qwen2.5-1.5B-Instruct-int8-ov
-            </Typography>
-          </Stack>
-          <Stack direction="row" spacing={2}>
-            <Typography variant="caption" color="text.primary">
-              Model Type:
-            </Typography>
-            <Typography variant="caption" color="text.secondary">
-              Text Generation
-            </Typography>
-          </Stack>
-          <Stack direction="row" spacing={2}>
-            <Typography variant="caption" color="text.primary">
-              Source Endpoint:
-            </Typography>
-            <Typography variant="caption" color="text.secondary">
-              Hugging Face
-            </Typography>
-          </Stack>
-        </CardContent>
-        <CardActions sx={{ justifyContent: "flex-end" }}>
-          <Button size="small">Download</Button>
-        </CardActions>
-      </Card>
+          </AccordionSummary>
+          <AccordionDetails>
+            {models
+              .filter((model) => model.model_type === modelType)
+              .sort((a, b) => {
+                if (modelType === "chat_model") {
+                  // Recommended first
+                  if (a.recommended && !b.recommended) return -1;
+                  if (!a.recommended && b.recommended) return 1;
+                  // Both recommended, sort by accuracy descending
+                  if (a.recommended && b.recommended) {
+                    return (b.accuracy ?? 0) - (a.accuracy ?? 0);
+                  }
+                }
+                return 0;
+              })
+              .map((model) => (
+                <Card
+                  key={model.id}
+                  sx={{
+                    width: "100%",
+                    mb: 2,
+                    backgroundColor: model.selected ? "#e0f7fa" : "#fff",
+                  }}
+                >
+                  <CardContent sx={{ position: "relative" }}>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "flex-start",
+                      }}
+                    >
+                      <Typography variant="body1" gutterBottom>
+                        {model.full_name}
+                      </Typography>
+                      <Box sx={{}}>
+                        {model.recommended && (
+                          <Chip
+                            label="Recommended"
+                            size="small"
+                            color="success"
+                          />
+                        )}
+                        {model.info.pipeline_tag && (
+                          <Chip
+                            label={model.info.pipeline_tag}
+                            size="small"
+                            color="primary"
+                          />
+                        )}
+                        <Chip
+                          label={model.model_type}
+                          size="small"
+                          color="primary"
+                        />
+                      </Box>
+                    </Box>
+                    <Stack direction="row" spacing={2}>
+                      <Typography variant="caption">Model ID:</Typography>
+                      <Typography variant="caption">{model.info.id}</Typography>
+                    </Stack>
+                    <Stack direction="row" spacing={2}>
+                      <Typography variant="caption">
+                        Downloads Count:
+                      </Typography>
+                      <Typography variant="caption">
+                        {model.info.downloads}
+                      </Typography>
+                      <Typography variant="caption">Likes Count:</Typography>
+                      <Typography variant="caption">
+                        {model.info.likes}
+                      </Typography>
+                    </Stack>
+
+                    <Stack direction="row" spacing={2}>
+                      <Typography variant="caption">SHA:</Typography>
+                      <Typography variant="caption">
+                        {model.commit_id}
+                      </Typography>
+                    </Stack>
+                  </CardContent>
+                  <CardActions sx={{ justifyContent: "flex-end" }}>
+                    <Button
+                      size="small"
+                      onClick={() =>
+                        openUrl(
+                          model.download_link.includes("aibuilder")
+                            ? model.model_card
+                            : model.download_link
+                        )
+                      }
+                    >
+                      Source
+                    </Button>
+                    <Button
+                      size="small"
+                      disabled={model.downloaded}
+                      onClick={() => downloadModel(model, localModelDir)}
+                      loading={downloading === model.full_name}
+                      loadingPosition="end"
+                    >
+                      {model.downloaded ? "Downloaded" : "Download"}
+                    </Button>
+                    <Button
+                      size="small"
+                      disabled={!model.downloaded}
+                      color="error"
+                    >
+                      Remove
+                    </Button>
+                    <Button
+                      size="small"
+                      disabled={model.selected || !model.downloaded}
+                      onClick={() => {
+                        handleModelSelect(model);
+                      }}
+                    >
+                      {model.selected && model.downloaded
+                        ? "Selected"
+                        : "Select"}
+                    </Button>
+                  </CardActions>
+
+                  {downloading === model.full_name && (
+                    <LinearProgress
+                      variant="determinate"
+                      value={downloadProgress}
+                    />
+                  )}
+                </Card>
+              ))}
+          </AccordionDetails>
+        </Accordion>
+      ))}
     </Box>
   );
 }

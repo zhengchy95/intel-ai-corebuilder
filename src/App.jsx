@@ -1,4 +1,5 @@
 import * as React from "react";
+import { invoke } from "@tauri-apps/api/core";
 import { CssBaseline, Box, Typography } from "@mui/material";
 import { styled, useTheme } from "@mui/material/styles";
 
@@ -7,12 +8,73 @@ import AppBar from "./components/appBar/AppBar";
 import SideBar from "./components/sideBar/SideBar";
 import Chat from "./pages/chat/Chat";
 import Model from "./pages/model/Model";
+import useAppStore from "./stores/AppStore";
 import useUIStore from "./stores/UIStores";
+import useSuperbuilderStore from "./stores/SuperbuilderStore";
+import useModelStore from "./stores/ModelStore";
+import useChatStore from "./stores/ChatStore";
 
 function App() {
   const theme = useTheme();
   const drawerOpen = useUIStore((state) => state.drawerOpen);
   const appPage = useUIStore((state) => state.appPage);
+  const config = useSuperbuilderStore((state) => state.config);
+  const models = useModelStore((state) => state.models);
+
+  React.useEffect(() => {
+    const initializeApp = async () => {
+      const response = await invoke("connect_client");
+      console.log("Middleware status:", response);
+      if (response == "Connected") {
+        await useSuperbuilderStore.getState().fetchConfig();
+        await useChatStore.getState().getSession();
+      }
+    };
+
+    initializeApp();
+  }, []);
+
+  React.useEffect(() => {
+    const fetchModels = async () => {
+      await useModelStore.getState().setLocalModelDir(config.local_model_hub);
+      await useModelStore.getState().setEndpoint(config);
+      await useModelStore.getState().fetchModels(config);
+    };
+
+    if (config) {
+      useAppStore.getState().setUsername();
+      fetchModels();
+    }
+  }, [config]);
+
+  React.useEffect(() => {
+    const modelWarmUp = async () => {
+      const selectedDownloaded = models.filter(
+        (m) => m.selected === true && m.downloaded === true
+      );
+      if (
+        selectedDownloaded.length === 3 &&
+        selectedDownloaded.filter((m) => m.model_type === "chat_model")
+          .length === 1 &&
+        selectedDownloaded.filter((m) => m.model_type === "embedding_model")
+          .length === 1 &&
+        selectedDownloaded.filter((m) => m.model_type === "ranker_model")
+          .length === 1
+      ) {
+        // All conditions met
+        const pyllm_status = await useSuperbuilderStore
+          .getState()
+          .checkPyLLM(config);
+        if (pyllm_status === "ready") {
+          await useSuperbuilderStore.getState().loadModels();
+        }
+      }
+    };
+
+    if (models) {
+      modelWarmUp();
+    }
+  }, [models]);
 
   return (
     <Box display="flex" sx={{ height: "100%", width: "100%" }}>
