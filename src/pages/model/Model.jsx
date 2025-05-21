@@ -52,97 +52,111 @@ export default function Model() {
   return (
     <Box
       sx={{
-        pt: 3,
-        pb: 10,
+        mt: 3,
+        mb: 3,
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
         overflowY: "auto",
+        height: "95%",
       }}
     >
-      <TextField
-        fullWidth
-        variant="outlined"
-        size="small"
-        value={""}
-        // onChange={(e) => setQuery(e.target.value)}
-        placeholder={"Hugging Face Model ID"}
-        slotProps={{
-          input: {
-            startAdornment: (
-              <InputAdornment position="start" sx={{ px: 1 }}>
-                <IconButton
-                  //   onClick={handleSearch}
-                  aria-label="search"
-                  edge="start"
-                >
-                  <SearchIcon />
-                </IconButton>
-                <Select
-                  size="small"
-                  defaultValue="hf"
-                  sx={{
-                    minWidth: 60,
-                    mr: 1,
-                    background: "#f5f5f5",
-                    "& .MuiSelect-select": {
-                      py: 0.5,
-                      fontSize: 12,
-                    },
-                  }}
-                  // onChange={handleSourceChange}
-                  displayEmpty
-                >
-                  <MenuItem value="hf" sx={{ fontSize: 12 }}>
-                    Hugging Face
-                  </MenuItem>
-                  <MenuItem value="msc" sx={{ fontSize: 12 }}>
-                    ModelScope CN
-                  </MenuItem>
-                </Select>
-              </InputAdornment>
-            ),
-            // endAdornment: query && (
-            //   <InputAdornment position="end">
-            //     <IconButton aria-label="clear" edge="end">
-            //       <ClearIcon />
-            //     </IconButton>
-            //   </InputAdornment>
-            // ),
-            sx: {
-              fontSize: 12, // input value font size
-              "&::placeholder": {
-                fontSize: 12, // placeholder font size
-                opacity: 1,
-              },
-              py: 0.5,
-            },
-          },
-        }}
+      <Box
         sx={{
-          my: 10,
-          width: "50%",
-          "& .MuiOutlinedInput-root": {
-            borderRadius: 8,
-            backgroundColor: "#fff",
-            "& fieldset": {
-              borderColor: "#ccc",
-            },
-            "&:hover fieldset": {
-              borderColor: "#888",
-            },
-            "&.Mui-focused fieldset": {
-              borderColor: "#007bff",
-            },
-          },
+          position: "sticky",
+          top: 0,
+          zIndex: 100,
+          background: "#fff",
+          width: "100%",
+          display: "flex",
+          justifyContent: "center",
+          pb: 2,
         }}
-      />
+      >
+        <TextField
+          fullWidth
+          variant="outlined"
+          size="small"
+          value={""}
+          // onChange={(e) => setQuery(e.target.value)}
+          placeholder={"Hugging Face Model ID"}
+          slotProps={{
+            input: {
+              startAdornment: (
+                <InputAdornment position="start" sx={{ px: 1 }}>
+                  <IconButton
+                    //   onClick={handleSearch}
+                    aria-label="search"
+                    edge="start"
+                  >
+                    <SearchIcon />
+                  </IconButton>
+                  <Select
+                    size="small"
+                    defaultValue="hf"
+                    sx={{
+                      minWidth: 60,
+                      mr: 1,
+                      background: "#f5f5f5",
+                      "& .MuiSelect-select": {
+                        py: 0.5,
+                        fontSize: 12,
+                      },
+                    }}
+                    // onChange={handleSourceChange}
+                    displayEmpty
+                  >
+                    <MenuItem value="hf" sx={{ fontSize: 12 }}>
+                      Hugging Face
+                    </MenuItem>
+                    <MenuItem value="msc" sx={{ fontSize: 12 }}>
+                      ModelScope CN
+                    </MenuItem>
+                  </Select>
+                </InputAdornment>
+              ),
+              // endAdornment: query && (
+              //   <InputAdornment position="end">
+              //     <IconButton aria-label="clear" edge="end">
+              //       <ClearIcon />
+              //     </IconButton>
+              //   </InputAdornment>
+              // ),
+              sx: {
+                fontSize: 12, // input value font size
+                "&::placeholder": {
+                  fontSize: 12, // placeholder font size
+                  opacity: 1,
+                },
+                py: 0.5,
+              },
+            },
+          }}
+          sx={{
+            my: 5,
+            width: "50%",
+            "& .MuiOutlinedInput-root": {
+              borderRadius: 8,
+              backgroundColor: "#fff",
+              "& fieldset": {
+                borderColor: "#ccc",
+              },
+              "&:hover fieldset": {
+                borderColor: "#888",
+              },
+              "&.Mui-focused fieldset": {
+                borderColor: "#007bff",
+              },
+            },
+          }}
+        />
+      </Box>
 
       {["chat_model", "embedding_model", "ranker_model"].map((modelType) => (
         <Accordion
           key={modelType}
           defaultExpanded={modelType === "chat_model"}
-          sx={{ width: "75%", mb: 2, boxShadow: 0 }}
+          sx={{ width: "75%", boxShadow: 0 }}
         >
           <AccordionSummary
             expandIcon={<KeyboardArrowDownIcon />}

@@ -298,6 +298,33 @@ pub async fn get_chat_history(client: tauri::State<'_, SharedClient>) -> Result<
 }
 
 #[tauri::command]
+pub async fn rename_chat_session(
+    client: tauri::State<'_, SharedClient>,
+    sid: i32, // int32 required for GRPC
+    name: String,
+) -> Result<bool, String> {
+    // Get a mutable reference to the QueryClient from the shared state
+    let mut client_guard = client.lock().await;
+    let client_ref = client_guard.as_mut().ok_or("Client not initialized")?;
+
+    // Create the QueryRequest
+    let request = super_builder::SetSessionNameRequest {
+        session_id: sid,
+        session_name: name,
+    };
+
+    // Perform the gRPC query
+    let response = client_ref
+        .set_session_name(request)
+        .await
+        .map_err(|e| format!("Failed to query database: {}", e))?;
+
+    // Extract the message from the QueryReply
+    let reply = response.into_inner();
+    Ok(reply.success)
+}
+
+#[tauri::command]
 pub async fn remove_chat_session(
     client: tauri::State<'_, SharedClient>,
     sid: i32, // int32 required for GRPC

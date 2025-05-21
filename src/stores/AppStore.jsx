@@ -8,6 +8,11 @@ const useAppStore = create((set) => ({
     console.debug("Username fetched:", username);
     set({ username });
   },
+
+  status: "",
+  setStatus: (status) => {
+    set({ status });
+  },
 }));
 
 export default useAppStore;

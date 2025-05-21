@@ -6,6 +6,7 @@ import { styled, useTheme } from "@mui/material/styles";
 import "./App.css";
 import AppBar from "./components/appBar/AppBar";
 import SideBar from "./components/sideBar/SideBar";
+import StatusBar from "./components/statusBar/StatusBar";
 import Chat from "./pages/chat/Chat";
 import Model from "./pages/model/Model";
 import useAppStore from "./stores/AppStore";
@@ -20,6 +21,7 @@ function App() {
   const appPage = useUIStore((state) => state.appPage);
   const config = useSuperbuilderStore((state) => state.config);
   const models = useModelStore((state) => state.models);
+  const setStatus = useAppStore((state) => state.setStatus);
 
   React.useEffect(() => {
     const initializeApp = async () => {
@@ -31,6 +33,7 @@ function App() {
       }
     };
 
+    setStatus("Initializing...");
     initializeApp();
   }, []);
 
@@ -42,7 +45,8 @@ function App() {
     };
 
     if (config) {
-      useAppStore.getState().setUsername();
+      setStatus("Parsing Models...");
+      // useAppStore.getState().setUsername();
       fetchModels();
     }
   }, [config]);
@@ -62,11 +66,14 @@ function App() {
           .length === 1
       ) {
         // All conditions met
+        setStatus("Checking PyLLM...");
         const pyllm_status = await useSuperbuilderStore
           .getState()
           .checkPyLLM(config);
         if (pyllm_status === "ready") {
+          setStatus("Loading Models...");
           await useSuperbuilderStore.getState().loadModels();
+          setStatus("");
         }
       }
     };
@@ -106,6 +113,7 @@ function App() {
         )}
         {appPage === "settings" && <Typography>Settings Page</Typography>}
       </Box>
+      <StatusBar />
     </Box>
   );
 }

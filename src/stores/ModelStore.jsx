@@ -29,7 +29,6 @@ const useModelStore = create((set) => ({
             config.local_model_hub,
             model.full_name
           );
-          console.log("Model Downloaded:", modelDownloaded, model.full_name);
           return {
             ...model,
             id: index,

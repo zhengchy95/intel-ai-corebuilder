@@ -10,21 +10,30 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  Menu,
+  CircularProgress,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
+import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
+import SettingsIcon from "@mui/icons-material/Settings";
 
 import useAppStore from "../../stores/AppStore";
 import useUIStore from "../../stores/UIStores";
 import useModelStore from "../../stores/ModelStore";
+import useChatStore from "../../stores/ChatStore";
 
 export default function Appbar() {
   const theme = useTheme();
   const username = useAppStore((state) => state.username);
+  const status = useAppStore((state) => state.status);
   const drawerOpen = useUIStore((state) => state.drawerOpen);
   const setDrawerOpen = useUIStore((state) => state.setDrawerOpen);
   const appPage = useUIStore((state) => state.appPage);
   const models = useModelStore((state) => state.models);
+
+  const selectNewChatSession = () => {
+    useUIStore.getState().setAppPage("chat");
+    useChatStore.getState().setSelectedSession(null);
+  };
 
   return (
     <MuiAppBar
@@ -65,70 +74,94 @@ export default function Appbar() {
           >
             <MenuIcon />
           </IconButton>
+          <IconButton
+            color="inherit"
+            aria-label="open new chat session"
+            onClick={() => selectNewChatSession()}
+            edge="start"
+            sx={[drawerOpen && { display: "none" }]}
+          >
+            <AddCircleOutlineIcon />
+          </IconButton>
           {appPage === "chat" && (
-            <Box
-              sx={{ display: "flex", minWidth: 120, alignContent: "center" }}
-            >
-              <FormControl fullWidth>
-                <Select
-                  labelId="model-select-label"
-                  id="model-select"
-                  value={
-                    models.find(
-                      (m) =>
-                        m.selected &&
-                        m.downloaded &&
-                        m.model_type === "chat_model"
-                    )?.id || -1
-                  }
-                  size="small"
-                  variant="standard"
-                  sx={{
-                    "&:before, &:after": {
-                      borderBottom: "none !important",
-                    },
-                    "& .MuiSelect-root:before, & .MuiSelect-root:after": {
-                      borderBottom: "none !important",
-                    },
-                    "& .MuiInput-underline:before, & .MuiInput-underline:after":
-                      {
+            <>
+              <Box
+                sx={{ display: "flex", minWidth: 120, alignContent: "center" }}
+              >
+                <FormControl fullWidth>
+                  <Select
+                    labelId="model-select-label"
+                    id="model-select"
+                    value={
+                      models.find(
+                        (m) =>
+                          m.selected &&
+                          m.downloaded &&
+                          m.model_type === "chat_model"
+                      )?.id || -1
+                    }
+                    disabled={status !== ""}
+                    size="small"
+                    variant="standard"
+                    sx={{
+                      "&:before, &:after": {
                         borderBottom: "none !important",
                       },
-                    "& .MuiSelect-select": {
-                      fontSize: "14px", // smaller font size
-                      display: "flex",
-                      alignItems: "center", // vertical centering
-                      minHeight: "32px", // ensure enough height for centering
-                      paddingY: "4px",
-                    },
-                  }}
-                >
-                  <MenuItem value={-1} sx={{ fontSize: "14px" }}>
-                    No Model Available
-                  </MenuItem>
-                  {models
-                    ?.filter(
+                      "& .MuiSelect-root:before, & .MuiSelect-root:after": {
+                        borderBottom: "none !important",
+                      },
+                      "& .MuiInput-underline:before, & .MuiInput-underline:after":
+                        {
+                          borderBottom: "none !important",
+                        },
+                      "& .MuiSelect-select": {
+                        fontSize: "14px", // smaller font size
+                        display: "flex",
+                        alignItems: "center", // vertical centering
+                        minHeight: "32px", // ensure enough height for centering
+                        paddingY: "4px",
+                      },
+                    }}
+                  >
+                    {models?.filter(
                       (model) =>
                         model.downloaded && model.model_type === "chat_model"
-                    )
-                    .map((model) => (
-                      <MenuItem
-                        key={model.id}
-                        value={model.id}
-                        sx={{ fontSize: "14px" }}
-                      >
-                        {model.full_name}
+                    ).length === 0 && (
+                      <MenuItem value={-1} sx={{ fontSize: "14px" }}>
+                        No Model Available
                       </MenuItem>
-                    ))}
-                </Select>
-              </FormControl>
-            </Box>
+                    )}
+
+                    {models
+                      ?.filter(
+                        (model) =>
+                          model.downloaded && model.model_type === "chat_model"
+                      )
+                      .map((model) => (
+                        <MenuItem
+                          key={model.id}
+                          value={model.id}
+                          sx={{ fontSize: "14px" }}
+                        >
+                          {model.full_name}
+                        </MenuItem>
+                      ))}
+                  </Select>
+                </FormControl>
+              </Box>
+              {status === "Loading Models..." && (
+                <CircularProgress color="inherit" size="18px" />
+              )}
+            </>
           )}
         </Box>
         <Box>
-          <Avatar sx={{ width: 28, height: 28, fontSize: "12px" }}>
+          {/* <Avatar sx={{ width: 28, height: 28, fontSize: "12px" }}>
             {username}
-          </Avatar>
+          </Avatar> */}
+          <IconButton color="inherit" aria-label="open settings" edge="end">
+            <SettingsIcon />
+          </IconButton>
         </Box>
       </Toolbar>
     </MuiAppBar>

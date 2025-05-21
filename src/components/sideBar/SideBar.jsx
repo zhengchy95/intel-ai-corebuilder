@@ -15,6 +15,8 @@ import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import PsychologyIcon from "@mui/icons-material/Psychology";
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
+import DeleteIcon from "@mui/icons-material/Delete";
+
 import useUIStore from "../../stores/UIStores";
 import useChatStore from "../../stores/ChatStore";
 import { isToday, isPast7Days, isOlder } from "../../utils/dateCheck";
@@ -24,6 +26,8 @@ export default function SideBar() {
   const setDrawerClose = useUIStore((state) => state.setDrawerClose);
   const setAppPage = useUIStore((state) => state.setAppPage);
   const sessions = useChatStore((state) => state.sessions);
+  const selectedSession = useChatStore((state) => state.selectedSession);
+  const [hoveredSession, setHoveredSession] = React.useState(null);
 
   const selectChatSession = (session) => {
     setAppPage("chat");
@@ -33,6 +37,10 @@ export default function SideBar() {
   const selectNewChatSession = () => {
     setAppPage("chat");
     useChatStore.getState().setSelectedSession(null);
+  };
+
+  const removeChatSession = (sid) => {
+    useChatStore.getState().removeSession(sid);
   };
 
   return (
@@ -127,8 +135,9 @@ export default function SideBar() {
             sx={{
               pt: 0,
               "& .MuiListItemButton-root": {
-                minHeight: 32,
+                minHeight: 12,
                 px: 3,
+                py: 0,
               },
               "& .MuiListItemIcon-root": {
                 minWidth: 32,
@@ -156,9 +165,30 @@ export default function SideBar() {
           >
             {sessions
               .filter((s) => isToday(s.date))
+              .sort((a, b) => new Date(b.date) - new Date(a.date))
               .map((session) => (
-                <ListItem key={session.sid} disablePadding>
-                  <ListItemButton onClick={() => selectChatSession(session)}>
+                <ListItem
+                  key={session.sid}
+                  disablePadding
+                  onMouseEnter={() => setHoveredSession(session.sid)}
+                  onMouseLeave={() => setHoveredSession(null)}
+                  secondaryAction={
+                    hoveredSession === session.sid && (
+                      <IconButton
+                        edge="end"
+                        aria-label="delete"
+                        color="error"
+                        onClick={() => removeChatSession(session.sid)}
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    )
+                  }
+                >
+                  <ListItemButton
+                    selected={session.sid === selectedSession}
+                    onClick={() => selectChatSession(session)}
+                  >
                     <ListItemText primary={session.name} />
                   </ListItemButton>
                 </ListItem>
@@ -171,7 +201,7 @@ export default function SideBar() {
         <>
           <Typography
             variant="overline"
-            sx={{ fontSize: "10px", pl: 3, mt: 3, mb: 0 }}
+            sx={{ fontSize: "10px", pl: 3, mt: 1, mb: 0 }}
           >
             <b>Past 7 Days</b>
           </Typography>
@@ -209,9 +239,30 @@ export default function SideBar() {
           >
             {sessions
               .filter((s) => isPast7Days(s.date))
+              .sort((a, b) => new Date(b.date) - new Date(a.date))
               .map((session) => (
-                <ListItem key={session.sid} disablePadding>
-                  <ListItemButton onClick={() => selectChatSession(session)}>
+                <ListItem
+                  key={session.sid}
+                  disablePadding
+                  onMouseEnter={() => setHoveredSession(session.sid)}
+                  onMouseLeave={() => setHoveredSession(null)}
+                  secondaryAction={
+                    hoveredSession === session.sid && (
+                      <IconButton
+                        edge="end"
+                        aria-label="delete"
+                        color="error"
+                        onClick={() => removeChatSession(session.sid)}
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    )
+                  }
+                >
+                  <ListItemButton
+                    selected={session.sid === selectedSession}
+                    onClick={() => selectChatSession(session)}
+                  >
                     <ListItemText primary={session.name} />
                   </ListItemButton>
                 </ListItem>
@@ -262,9 +313,30 @@ export default function SideBar() {
           >
             {sessions
               .filter((s) => isOlder(s.date))
+              .sort((a, b) => new Date(b.date) - new Date(a.date))
               .map((session) => (
-                <ListItem key={session.sid} disablePadding>
-                  <ListItemButton onClick={() => selectChatSession(session)}>
+                <ListItem
+                  key={session.sid}
+                  disablePadding
+                  onMouseEnter={() => setHoveredSession(session.sid)}
+                  onMouseLeave={() => setHoveredSession(null)}
+                  secondaryAction={
+                    hoveredSession === session.sid && (
+                      <IconButton
+                        edge="end"
+                        aria-label="delete"
+                        color="error"
+                        onClick={() => removeChatSession(session.sid)}
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    )
+                  }
+                >
+                  <ListItemButton
+                    selected={session.sid === selectedSession}
+                    onClick={() => selectChatSession(session)}
+                  >
                     <ListItemText primary={session.name} />
                   </ListItemButton>
                 </ListItem>

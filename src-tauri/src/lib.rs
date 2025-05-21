@@ -26,6 +26,7 @@ async fn get_hf_model_info(model_id: String) -> Result<String, String> {
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_opener::init())
         .setup(|app| {
@@ -47,6 +48,7 @@ pub fn run() {
             superbuilder::get_chat_history,
             superbuilder::call_chat,
             superbuilder::stop_chat,
+            superbuilder::rename_chat_session,
             superbuilder::remove_chat_session
         ])
         .run(tauri::generate_context!())
