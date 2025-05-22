@@ -2,7 +2,7 @@
 
 <img src="src/assets/logo.png" alt="Intel AI Corebuilder Logo" width="120" align="right"/>
 
-## Overview
+<span style="font-size:22px;">Overview</span>
 
 Intel AI Corebuilder is a sophisticated and simplified user interface built with [Tauri v2](https://tauri.app/) that seamlessly connects to Intel AI Assistant Builder Services through gRPC.
 
@@ -40,12 +40,17 @@ Before running Intel AI Corebuilder, you must:
 
 For detailed installation instructions specific to your platform, see our Installation Guide.
 
-## 📖 Usage
+## 🧑‍💻 How to Use
 
-### Quick Start
+1. **Download the latest release**  
+   Go to the [Releases page](https://github.com/zhengchy95/intel-ai-corebuilder/releases) and download the intel-ai-corebuilder.exe
 
-1. Make sure Intel AI Assistant Builder is running in Windows Services
-2. Run Intel AI Corebuilder
+2. **Ensure Intel AI Assistant Builder is running**  
+   The UI requires the Assistant Builder service to be active for full functionality.
+
+3. **Start Intel AI Corebuilder**  
+   Double-click the executable and make sure run it as administrator.
+
 
 ## 🏗️ Architecture
 
@@ -111,15 +116,9 @@ We use [Semantic Versioning](https://semver.org/) for releases. For available ve
 - **Connection failed**: Ensure Intel AI Assistant Builder is running and the gRPC endpoint is correctly configured
 - **Performance issues**: Verify your system meets the minimum requirements
 
-For more troubleshooting tips, see our FAQ.
-
 ## 🔐 Security
 
 If you discover a security vulnerability, please follow our Security Policy for responsible disclosure.
-
-## 📊 Roadmap
-
-See our project roadmap for planned features and improvements.
 
 ## 👥 Team
 
@@ -134,9 +133,10 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ## 🙏 Acknowledgments
 
 - [Tauri](https://tauri.app/) for providing the framework
-- [Intel AI Assistant Builder team](https://github.com/intel/intel-ai-assistant-builder) for their proto file
+- Intel AI Assistant Builder team for their proto file open sourced at their [Github repo](https://github.com/intel/intel-ai-assistant-builder)
 - All our contributors and users
 
----
+<br>
 
+---
 _Intel AI Corebuilder is a personal project, not an Intel product._
