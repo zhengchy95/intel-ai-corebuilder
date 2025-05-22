@@ -2,5 +2,5 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 fn main() {
-    intel_superbuilder_core_lib::run()
+    intel_ai_corebuilder_lib::run()
 }

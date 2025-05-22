@@ -4,10 +4,10 @@
 
 ## Overview
 
-Intel Corebuilder is a sophisticated and simplified user interface built with [Tauri v2](https://tauri.app/) that seamlessly connects to Intel AI Assistant Builder Services through gRPC. It provides enterprise-grade tooling for AI model development, optimization, and deployment workflows with enhanced performance and reduced resource consumption compared to traditional web applications.
+Intel AI Corebuilder is a sophisticated and simplified user interface built with [Tauri v2](https://tauri.app/) that seamlessly connects to Intel AI Assistant Builder Services through gRPC.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-0.1.0-brightgreen)](https://github.com/zhengchy95/intel-superbuilder-core/releases)
+[![Version](https://img.shields.io/badge/version-0.1.0-brightgreen)](https://github.com/zhengchy95/intel-ai-corebuilder/releases)
 
 ---
 
@@ -16,14 +16,12 @@ Intel Corebuilder is a sophisticated and simplified user interface built with [T
 - **Modern Desktop Experience** - Leverages Tauri to provide native performance with web technologies
 - **Secure Communication** - Uses gRPC for efficient, type-safe communication with Intel AI Assistant Builder
 - **Responsive Design** - Adapts to different screen sizes and resolutions
-- **Cross-Platform Support** - Compatible with Windows, macOS, and Linux
 - **Hardware Acceleration** - Optimized for Intel processors and accelerators
-- **Customizable Workspaces** - Adapt the UI to your specific workflow needs
-- **Project Management** - Create, save, and manage multiple AI projects
+- **Local LLM** - Run Generative AI on Intel AIPC without Internet connection
 
 ## 📋 Prerequisites
 
-Before running Intel Corebuilder, you must:
+Before running Intel AI Corebuilder, you must:
 
 1. **Download and install Intel AI Assistant Builder (v1.2.0.0517)**  
    This UI connects to the Assistant Builder application via gRPC.
@@ -51,7 +49,7 @@ For detailed installation instructions specific to your platform, see our Instal
 
 ## 🏗️ Architecture
 
-Intel Corebuilder follows a modular architecture:
+Intel AI Corebuilder follows a modular architecture:
 
 - **Frontend**: Built with React and JavaScript
 - **Backend**: Rust-based Tauri application
@@ -69,10 +67,10 @@ Intel Corebuilder follows a modular architecture:
 
 ```bash
 # Clone the repository
-git clone https://github.com/intel/corebuilder.git
+git clone https://github.com/zhengchy95/intel-ai-corebuilder.git
 
 # Navigate to the project directory
-cd corebuilder
+cd intel-ai-corebuilder
 
 # Install dependencies
 npm install
@@ -87,7 +85,7 @@ npm run tauri build
 ### Project Structure
 
 ```
-corebuilder/
+intel-ai-corebuilder/
 ├── src/               # Frontend source code
    ├── assets/         # Static files such as images, fonts, and icons used by the frontend
    ├── components/     # Reusable React UI components (buttons, modals, forms, etc.)
@@ -104,7 +102,7 @@ We welcome contributions from the community!
 
 ## 📄 Versioning
 
-We use [Semantic Versioning](https://semver.org/) for releases. For available versions, see the [tags on this repository](https://github.com/zhengchy95/intel-superbuilder-core/tags).
+We use [Semantic Versioning](https://semver.org/) for releases. For available versions, see the [tags on this repository](https://github.com/zhengchy95/intel-ai-corebuilder/tags).
 
 ## ❓ Troubleshooting
 
@@ -141,4 +139,4 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ---
 
-_Intel Corebuilder is a personal project, not an Intel product._
+_Intel AI Corebuilder is a personal project, not an Intel product._

@@ -1936,7 +1936,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "intel-superbuilder-core"
+name = "intel-ai-corebuilder"
 version = "0.1.0"
 dependencies = [
  "futures",
