@@ -25,9 +25,11 @@ import ArticleIcon from "@mui/icons-material/Article";
 
 import useAppStore from "../../stores/AppStore";
 import useChatStore from "../../stores/ChatStore";
+import useModelStore from "../../stores/ModelStore";
 
 export default function Chat() {
   const status = useAppStore((state) => state.status);
+  const models = useModelStore((state) => state.models);
   const selectedSession = useChatStore((state) => state.selectedSession);
   const sessions = useChatStore((state) => state.sessions);
   const prompt = useChatStore((state) => state.prompt);
@@ -43,8 +45,8 @@ export default function Chat() {
     setPrompt,
     sendPrompt,
     setResponse,
-    setResponseCompleted,
     clearResponse,
+    stopResponse,
     createSession,
     setThinking,
     updateLastChatMessage,
@@ -121,7 +123,7 @@ export default function Chat() {
     });
     console.debug("Selected files:", files);
     if (files) {
-      setQuery(query);
+      setQuery(query === "gen_image" ? "image" : query);
       addAttachment(files);
     }
   };
@@ -182,11 +184,21 @@ export default function Chat() {
                           pl: 0,
                         }}
                       >
-                        <Typography variant="body2" sx={{ fontSize: "12px" }}>
-                          {index === messages.length - 1 && response !== ""
-                            ? response
-                            : message.text}
-                        </Typography>
+                        <Typography
+                          variant="body2"
+                          sx={{ fontSize: "12px", whiteSpace: "pre-wrap" }}
+                          dangerouslySetInnerHTML={{
+                            __html: (index === messages.length - 1 &&
+                            response !== ""
+                              ? response
+                              : message.text
+                            )
+                              .replace(/</g, "&lt;")
+                              .replace(/>/g, "&gt;")
+                              .replace(/(\*\*)(.*?)\1/g, "<b>$2</b>")
+                              .replace(/\n/g, "<br/>"),
+                          }}
+                        />
                       </Box>
                     )}
                   </>
@@ -235,6 +247,7 @@ export default function Chat() {
                         p: 1,
                         bgcolor: "lightGrey",
                         borderRadius: 2,
+                        color: "black",
                       }}
                     >
                       {message.text}
@@ -260,8 +273,8 @@ export default function Chat() {
             maxWidth: "600px",
             width: "100%",
             borderRadius: 6,
-            border: 1,
-            borderColor: "grey.300",
+            border: 0.1,
+            borderColor: "divider",
             p: 1,
             bgcolor: "background.paper",
             mt: selectedSession === null ? 0 : "auto",
@@ -372,44 +385,61 @@ export default function Chat() {
               alignItems="center"
             >
               <Box>
-                {["summarize", "table", "image", "resume"].map((query) => (
-                  <Button
-                    key={query}
-                    disabled={status !== ""}
-                    variant={selectedQuery === query ? "contained" : "outlined"}
-                    startIcon={
-                      query === "summarize" ? (
-                        <SummarizeIcon
-                          sx={{ fontSize: "14px !important", mr: -0.5 }}
-                        />
-                      ) : query === "table" ? (
-                        <TableViewIcon
-                          sx={{ fontSize: "14px !important", mr: -0.5 }}
-                        />
-                      ) : query === "image" ? (
-                        <ImageIcon
-                          sx={{ fontSize: "14px !important", mr: -0.5 }}
-                        />
-                      ) : (
-                        <ArticleIcon
-                          sx={{ fontSize: "14px !important", mr: -0.5 }}
-                        />
-                      )
-                    }
-                    sx={{
-                      fontSize: "10px",
-                      borderRadius: 12,
-                      boxShadow: 0,
-                      px: 1,
-                      ml: 1,
-                    }}
-                    onClick={() => {
-                      handleAttachmentClick(query);
-                    }}
-                  >
-                    {query}
-                  </Button>
-                ))}
+                {["summarize", "table", "image", "gen_image", "resume"].map(
+                  (query) => (
+                    <Button
+                      key={query}
+                      disabled={
+                        status !== ""
+                          ? true
+                          : query === "image" || query === "gen_image"
+                          ? models.find(
+                              (m) =>
+                                m.selected &&
+                                m.model_type === "chat_model" &&
+                                m.info.pipeline_tag === "image-text-to-text"
+                            )
+                            ? false
+                            : true
+                          : false
+                      }
+                      variant={
+                        selectedQuery === query ? "contained" : "outlined"
+                      }
+                      startIcon={
+                        query === "summarize" ? (
+                          <SummarizeIcon
+                            sx={{ fontSize: "14px !important", mr: -0.5 }}
+                          />
+                        ) : query === "table" ? (
+                          <TableViewIcon
+                            sx={{ fontSize: "14px !important", mr: -0.5 }}
+                          />
+                        ) : query === "image" ? (
+                          <ImageIcon
+                            sx={{ fontSize: "14px !important", mr: -0.5 }}
+                          />
+                        ) : (
+                          <ArticleIcon
+                            sx={{ fontSize: "14px !important", mr: -0.5 }}
+                          />
+                        )
+                      }
+                      sx={{
+                        fontSize: "10px",
+                        borderRadius: 12,
+                        boxShadow: 0,
+                        px: 1,
+                        ml: 1,
+                      }}
+                      onClick={() => {
+                        handleAttachmentClick(query);
+                      }}
+                    >
+                      {query}
+                    </Button>
+                  )
+                )}
               </Box>
 
               <IconButton
@@ -423,7 +453,7 @@ export default function Chat() {
                 }}
                 disabled={status !== ""}
                 onClick={() => {
-                  handleSendPrompt();
+                  thinking ? stopResponse() : handleSendPrompt();
                 }}
               >
                 {thinking ? (

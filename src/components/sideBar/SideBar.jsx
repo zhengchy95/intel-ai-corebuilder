@@ -189,7 +189,15 @@ export default function SideBar() {
                     selected={session.sid === selectedSession}
                     onClick={() => selectChatSession(session)}
                   >
-                    <ListItemText primary={session.name} />
+                    <ListItemText
+                      primary={session.name}
+                      sx={{
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        maxWidth: 150,
+                      }}
+                    />
                   </ListItemButton>
                 </ListItem>
               ))}
@@ -263,7 +271,15 @@ export default function SideBar() {
                     selected={session.sid === selectedSession}
                     onClick={() => selectChatSession(session)}
                   >
-                    <ListItemText primary={session.name} />
+                    <ListItemText
+                      primary={session.name}
+                      sx={{
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        maxWidth: 150,
+                      }}
+                    />
                   </ListItemButton>
                 </ListItem>
               ))}
@@ -337,7 +353,15 @@ export default function SideBar() {
                     selected={session.sid === selectedSession}
                     onClick={() => selectChatSession(session)}
                   >
-                    <ListItemText primary={session.name} />
+                    <ListItemText
+                      primary={session.name}
+                      sx={{
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        maxWidth: 150,
+                      }}
+                    />
                   </ListItemButton>
                 </ListItem>
               ))}

@@ -29,6 +29,7 @@ export default function Appbar() {
   const setDrawerOpen = useUIStore((state) => state.setDrawerOpen);
   const appPage = useUIStore((state) => state.appPage);
   const models = useModelStore((state) => state.models);
+  const setSettingOpen = useUIStore((state) => state.setSettingOpen);
 
   const selectNewChatSession = () => {
     useUIStore.getState().setAppPage("chat");
@@ -159,7 +160,12 @@ export default function Appbar() {
           {/* <Avatar sx={{ width: 28, height: 28, fontSize: "12px" }}>
             {username}
           </Avatar> */}
-          <IconButton color="inherit" aria-label="open settings" edge="end">
+          <IconButton
+            color="inherit"
+            aria-label="open settings"
+            edge="end"
+            onClick={() => setSettingOpen()}
+          >
             <SettingsIcon />
           </IconButton>
         </Box>

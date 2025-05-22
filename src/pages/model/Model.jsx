@@ -37,7 +37,6 @@ export default function Model() {
     const unlisten = listen("download-progress", (event) => {
       const [downloadFile, progressData] = event.payload;
       useModelStore.getState().setDownloadProgress(progressData);
-      console.debug("Download progress:", downloadFile, progressData);
     });
 
     return () => {
@@ -75,6 +74,7 @@ export default function Model() {
       >
         <TextField
           fullWidth
+          disabled // enabled when convert_model enabled
           variant="outlined"
           size="small"
           value={""}
@@ -93,6 +93,7 @@ export default function Model() {
                   </IconButton>
                   <Select
                     size="small"
+                    disabled // enabled when convert_model enabled
                     defaultValue="hf"
                     sx={{
                       minWidth: 60,
@@ -266,20 +267,20 @@ export default function Model() {
                     </Button>
                     <Button
                       size="small"
-                      disabled={model.downloaded}
+                      disabled={model.downloaded || downloading !== ""}
                       onClick={() => downloadModel(model, localModelDir)}
                       loading={downloading === model.full_name}
                       loadingPosition="end"
                     >
                       {model.downloaded ? "Downloaded" : "Download"}
                     </Button>
-                    <Button
+                    {/* <Button
                       size="small"
                       disabled={!model.downloaded}
                       color="error"
                     >
                       Remove
-                    </Button>
+                    </Button> */}
                     <Button
                       size="small"
                       disabled={model.selected || !model.downloaded}

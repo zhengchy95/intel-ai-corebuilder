@@ -63,7 +63,6 @@ const useChatStore = create((set, get) => ({
   updateLastChatMessage: (newMessage) => {
     set((state) => ({
       sessions: state.sessions.map((session) => {
-        console.log(state.selectedSession, session.sid);
         if (session.sid === state.selectedSession) {
           const messages = session.messages;
           messages[messages.length - 1].text = newMessage;
@@ -82,7 +81,7 @@ const useChatStore = create((set, get) => ({
   setResponse: (streamResponse) =>
     set((state) => ({ response: state.response + streamResponse })),
   clearResponse: () => set({ response: "" }),
-  stopRespons: async () => {
+  stopResponse: async () => {
     console.log("Stopping chat stream early...");
     await invoke("stop_chat");
   },

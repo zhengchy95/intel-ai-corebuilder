@@ -49,7 +49,11 @@ pub fn run() {
             superbuilder::call_chat,
             superbuilder::stop_chat,
             superbuilder::rename_chat_session,
-            superbuilder::remove_chat_session
+            superbuilder::remove_chat_session,
+            superbuilder::upload_file,
+            superbuilder::stop_upload_file,
+            superbuilder::remove_file,
+            superbuilder::get_file_list,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

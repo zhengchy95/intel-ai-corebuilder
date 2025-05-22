@@ -8,7 +8,11 @@ const useUIStore = create((set) => ({
   appPage: "chat",
   setAppPage: (page) => set({ appPage: page }),
 
-  appTheme: "light",
+  settingOpen: false,
+  setSettingOpen: () => set({ settingOpen: true }),
+  setSettingClose: () => set({ settingOpen: false }),
+
+  appTheme: "system",
   setAppTheme: (theme) => set({ appTheme: theme }),
 }));
 

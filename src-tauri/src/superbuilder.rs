@@ -3,7 +3,7 @@ pub mod super_builder {
 }
 use futures::stream::StreamExt;
 use serde::Deserialize;
-use serde_json::Value;
+use serde_json::{json, Value};
 use std::sync::Arc;
 use super_builder::super_builder_client::SuperBuilderClient;
 use super_builder::ChatRequest;
@@ -344,4 +344,129 @@ pub async fn remove_chat_session(
     // Extract the message from the QueryReply
     let reply = response.into_inner();
     Ok(reply.success)
+}
+
+#[tauri::command]
+pub async fn upload_file(
+    window: tauri::Window,
+    client: State<'_, SharedClient>,
+    paths: String,
+) -> Result<(), String> {
+    // Clone the client reference to avoid holding the lock for the entire function
+    let mut client_ref = {
+        let mut client_guard = client.lock().await;
+        client_guard
+            .as_mut()
+            .ok_or("Client not initialized")?
+            .clone()
+    };
+
+    let request = super_builder::AddFilesRequest {
+        files_to_upload: paths,
+    };
+
+    let response = client_ref
+        .add_files(request)
+        .await
+        .map_err(|e| format!("Failed to upload file: {}", e))?;
+
+    // Stream back file upload progress
+    let mut files_uploaded_result = String::from("");
+    let mut stream = response.into_inner();
+    while let Some(message) = stream.next().await {
+        match message {
+            Ok(file_response) => {
+                let files_uploaded = file_response.files_uploaded;
+                files_uploaded_result = files_uploaded.clone();
+                let mut current_file_progress = String::from("No progress");
+                let mut current_file_uploading = String::from("No file");
+
+                // Set optional fields if they exist
+                if let Some(current_file) = &file_response.current_file_uploading {
+                    current_file_uploading = current_file.clone();
+                }
+                if let Some(file_progress) = &file_response.current_file_progress {
+                    current_file_progress = file_progress.clone();
+                }
+
+                let msg = json!({
+                    "files_uploaded": files_uploaded,
+                    "current_file_uploading": current_file_uploading,
+                    "current_file_progress": current_file_progress,
+                });
+
+                // Emit the file progress to invoker
+                window
+                    .emit("upload-progress", msg)
+                    .map_err(|e| format!("Failed to emit message: {}", e))?;
+            }
+            Err(e) => return Err(format!("Stream error: {}", e)),
+        }
+    }
+
+    // Inform window that upload request is complete with final uploaded files result
+    // println!("Returning files uploaded result: {}", files_uploaded_result);
+    window
+        .emit("upload-completed", files_uploaded_result)
+        .expect("Failed to emit stream completed event");
+    Ok(())
+}
+
+// Attempt to stop backend file upload early
+#[tauri::command]
+pub async fn stop_upload_file(
+    _window: tauri::Window,
+    client: State<'_, SharedClient>,
+) -> Result<(), String> {
+    let mut client_guard = client.lock().await;
+    let client_ref = client_guard.as_mut().ok_or("Client not initialized")?;
+    // Build and send stop upload file request
+    let request = super_builder::StopAddFilesRequest {};
+    let response = client_ref
+        .stop_add_files(request)
+        .await
+        .map_err(|e| format!("Failed to stop upload file: {}", e))?;
+    let _reply = response.into_inner();
+    // println!("File upload canceled");
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn remove_file(
+    client: State<'_, SharedClient>,
+    files: String, // This should be the file content sent from the frontend
+) -> Result<String, String> {
+    let mut client_guard = client.lock().await;
+    let client_ref = client_guard.as_mut().ok_or("Client not initialized")?;
+
+    let request = super_builder::RemoveFilesRequest {
+        files_to_remove: files,
+    };
+
+    let response = client_ref
+        .remove_files(request)
+        .await
+        .map_err(|e| format!("Failed to remove file: {}", e))?;
+
+    let reply = response.into_inner();
+    Ok(reply.files_removed)
+}
+
+#[tauri::command]
+pub async fn get_file_list(client: State<'_, SharedClient>) -> Result<String, String> {
+    let mut client_guard = client.lock().await;
+    let client_ref = client_guard.as_mut().ok_or("Client not initialized")?;
+
+    let request = super_builder::GetFileListRequest {
+        file_type: "".to_string(),
+    };
+
+    let response = client_ref
+        .get_file_list(request)
+        .await
+        .map_err(|e| format!("Failed to get file list: {}", e))?;
+
+    let reply = response.into_inner();
+
+    Ok(reply.file_list)
 }
