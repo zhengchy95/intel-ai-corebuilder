@@ -78,13 +78,13 @@ git clone https://github.com/zhengchy95/intel-ai-corebuilder.git
 cd intel-ai-corebuilder
 
 # Install dependencies
-npm install
+pnpm install
 
 # Start the application with vite
-npm run tauri dev
+pnpm run tauri dev
 
 # Build the application
-npm run tauri build
+pnpm run tauri build
 ```
 
 ### Project Structure
