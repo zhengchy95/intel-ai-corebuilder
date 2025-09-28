@@ -1,4 +1,4 @@
-# Intel AI Corebuilder
+# Intel AI Corebuilder (Temporary Archive until I owned an Intel AIPC and able to install Intel AI Assistant Builder in the future)
 
 <img src="src/assets/logo.png" alt="Intel AI Corebuilder Logo" width="120" align="right"/>
 
